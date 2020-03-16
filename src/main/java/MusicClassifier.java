@@ -49,6 +49,7 @@ public class MusicClassifier {
     }
   }
 
+  // 删除重复文件
   private static void removeDuplicatedFiles(Path path) {
     File dir = new File(path.toString());
     File[] array = dir.listFiles();
