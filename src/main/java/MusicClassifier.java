@@ -3,6 +3,8 @@ import com.google.common.flogger.FluentLogger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class MusicClassifier {
@@ -25,6 +27,7 @@ public class MusicClassifier {
     File dir = new File(path.toString());
     File[] array = dir.listFiles();
 
+    Map<String, Long> map = getSizeMap(path);
     for (int i = 0; i < array.length; i++) {
       File file = array[i];
       if (file.isHidden()) {
@@ -38,9 +41,11 @@ public class MusicClassifier {
             File toDir = new File(toPath.toString());
             if (!toDir.exists()) {
               boolean result = toDir.mkdir();
-              logger.atInfo().log("Creating dir: %s, status: %s", toDir.getName(), result);
+              // logger.atInfo().log("Creating dir: %s, status: %s", toDir.getName(), result);
             }
-            Files.move(file.toPath(), toPath);
+            Path toFile = Paths.get(toPath.toString(), file.getName());
+            logger.atInfo().log("Moving file from %s to %s", file.toPath(), toFile);
+            Files.move(file.toPath(), toFile);
           }
         } catch (Exception e) {
           logger.atWarning().log(e.getMessage());
@@ -49,20 +54,38 @@ public class MusicClassifier {
     }
   }
 
+  private static Map<String, Long> getSizeMap(Path path) {
+    Map<String, Long> map = new HashMap<>();
+    File dir = new File(path.toString());
+    File[] array = dir.listFiles();
+
+    for (int i = 0; i < array.length; i++) {
+      File file = array[i];
+      if (file.isHidden()) {
+        continue;
+      }
+      if (file.isFile()) {
+        // logger.atInfo().log("%s size is %s kb", file.getName(), file.length() / 1024);
+        map.put(file.getName(), file.length());
+      }
+    }
+    return map;
+  }
+
   // 删除重复文件
   private static void removeDuplicatedFiles(Path path) {
     File dir = new File(path.toString());
     File[] array = dir.listFiles();
 
     for (int i = 0; i < array.length; i++) {
-      File fileOrDir = array[i];
-      if (fileOrDir.isHidden()) {
+      File file = array[i];
+      if (file.isHidden()) {
         continue;
       }
-      if (fileOrDir.isFile()) {
-        if (isDuplicatedFile(fileOrDir)) {
+      if (file.isFile()) {
+        if (isDuplicatedFile(file)) {
           try {
-            deleteFile(fileOrDir);
+            deleteFile(file);
           } catch (Exception e) {
             logger.atWarning().log(e.getMessage());
           }
@@ -82,10 +105,6 @@ public class MusicClassifier {
       return Optional.empty();
     }
     String[] pair = file.getName().replaceAll("\\s", "").split(SPLITTER);
-    if (pair.length != 2) {
-      logger.atWarning().log("Cannot find singer for file: %s", file.getName());
-      return Optional.empty();
-    }
     return Optional.of(pair[0]);
   }
 
