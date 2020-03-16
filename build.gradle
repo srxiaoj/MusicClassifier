@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+}
+
+group 'music_classifier'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
+    // https://mvnrepository.com/artifact/com.google.flogger/flogger-log4j-backend
+    compile group: 'com.google.flogger', name: 'flogger-system-backend', version: '0.4'
+}
